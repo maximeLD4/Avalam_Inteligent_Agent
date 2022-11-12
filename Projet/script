@@ -1,0 +1,2 @@
+#!/bin/bash
+echo $(python game.py http://localhost:8000 http://localhost:8080 --time 900 --verbose --no-gui) | head -1
