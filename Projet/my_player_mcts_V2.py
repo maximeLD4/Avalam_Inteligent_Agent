@@ -69,7 +69,7 @@ class MyAgent(Agent):
         def select(root_node, start_time, step_arg):
             current_node = root_node
             #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
-            time_left_to_play = min(time_normal(step_arg), time_left)
+            time_left_to_play = min(time_limit(step_arg), time_left)
             # sqrt(step) * cst_c est toujours < timeleft sauf peut etre pour le dernier coup si jamais erreur dans
             # les calculs et en fait on a pris plus de temps que prévus ...
             while not current_node.get_is_leaf():
@@ -105,7 +105,7 @@ class MyAgent(Agent):
         def expend(n, start_time, step_arg):
             board_clone = n.get_board()
             #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
-            time_left_to_play = min(time_normal(step_arg), time_left)
+            time_left_to_play = min(time_limit(step_arg), time_left)
             if n.get_n() > 0 or n.get_is_root():
                 if list(board_clone.get_actions()):
                     for action in list(board_clone.get_actions()):
@@ -125,7 +125,7 @@ class MyAgent(Agent):
             clone_board = n.get_board()
             step_player = n.get_step_player()
             #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
-            time_left_to_play = min(time_normal(step_arg), time_left)
+            time_left_to_play = min(time_limit(step_arg), time_left)
             while not clone_board.is_finished():
                 if time.time() - start_time >= time_left_to_play:
                     return False, n
@@ -144,7 +144,7 @@ class MyAgent(Agent):
         def backpropagation(v, n, start_time, step_arg):
             current_node = n
            #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
-            time_left_to_play = min(time_normal(step_arg), time_left)
+            time_left_to_play = min(time_limit(step_arg), time_left)
             while not (current_node.get_is_root()):
                 if time.time() - start_time >= time_left_to_play:
                     return False, current_node
@@ -173,7 +173,7 @@ class MyAgent(Agent):
             emergence_root_node = root_node
             start_time = time.time()
             #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
-            time_left_to_play = min(time_normal(step_arg), time_left)
+            time_left_to_play = min(time_limit(step_arg), time_left)
             print("time_left_to_play : ", time_left_to_play)
             while time.time() - start_time <= time_left_to_play:
                 boolean, node_leaf = select(root_node, start_time, step_arg)
@@ -199,7 +199,7 @@ class MyAgent(Agent):
             #emergence_root_node = root_node
             start_time = time.time()
             #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
-            time_left_to_play = min(time_normal(step_arg), time_left)
+            time_left_to_play = min(time_limit(step_arg), time_left)
             while time.time() - start_time <= time_left_to_play:
                 boolean, node_leaf = select(root_node, start_time, step_arg)
                 if not boolean:

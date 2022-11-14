@@ -25,7 +25,7 @@ from math import sqrt, log, exp
 from decimal import Decimal
 import time
 
-CONSTANTE_C = 12.7
+CONSTANTE_C = 12.2
 
 # pour le joueur qui commence au tour 5
 # 12.7*(sqrt(35)+sqrt(33)+sqrt(31)+sqrt(29)+sqrt(27)+sqrt(25)+sqrt(23)+sqrt(21)+sqrt(19)+sqrt(17)+sqrt(15)
