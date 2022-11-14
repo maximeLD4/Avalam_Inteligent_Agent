@@ -51,12 +51,12 @@ class MyAgent(Agent):
                     tower_score = board.m[row][column]
                     if tower_score != 0:
                         if tower_score > 0:
-                            if(tower_score == 1):
+                            if tower_score == 1:
                                 nb_tower_of_one_positive += 1
                             positives_tower_score_1 += tower_score
                             positives_tower_score_2 += tower_score/tower_score
                         elif tower_score < 0:
-                            if(tower_score == -1):
+                            if tower_score == -1:
                                 nb_tower_of_one_negative += 1
                             negatives_tower_score_1 += tower_score
                             negatives_tower_score_2 += tower_score/abs(tower_score)
