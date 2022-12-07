@@ -22,11 +22,13 @@ from avalam import *
 
 
 class RandomAgent(Agent):
-
     """A dumb random agent."""
     def play(self, percepts, player, step, time_left):
         board = dict_to_board(percepts)
         actions = list(board.get_actions())
+        game_log = "game_log.csv"
+        with open(game_log, 'a') as f:
+            f.write(str(len(actions))+',')
         print('step', step, 'player', player, 'actions', len(actions))
         return random.choice(actions)
 

@@ -30,6 +30,9 @@ import subprocess
 
 from avalam import *
 
+WEIGHT_0 = 10
+WEIGHT_1 = 50
+WEIGHT_2 = 100
 
 class TimeCreditExpired(Exception):
     """An agent has expired its time credit."""
@@ -275,6 +278,39 @@ class Game:
         self.trace.set_winner(winner, reason)
         self.viewer.finished(self.step, winner, reason)
 
+    def utility(self, board_arg):
+        board_clone = board_arg.clone()
+        rows = board_clone.rows
+        columns = board_clone.columns
+        score_tot = 0
+        h = 5
+        for row in range(0, rows, 1):
+            for column in range(0, columns, 1):
+                # Partie d'Heuristique qui permet de compter le score actuel par tour
+                tower_score = board_clone.m[row][column]
+                if tower_score != 0:
+                    if self.player * tower_score > 0:
+                        score_tot += self.player * WEIGHT_0
+                # Strategy A (Imitation)
+                # Partie d'Heuristique qui permet de ne pas laisser une tour completable ( de +- 1,2,3 et 4 vers +-5 ) par l'adversaire
+                # au prochain tour, et qui minimise le score si c'est le cas. Attention minimisation des 10, à modifier eventuellement !
+                for score_incomplet in range(1, h, 1):
+                    if abs(tower_score) == score_incomplet:
+                        for row_conv_1 in range(-1, 2, 1):
+                            for column_conv_1 in range(-1, 2, 1):
+                                if 8 > (row + row_conv_1) > 0 and 8 > (column + column_conv_1) > 0:
+                                    current_tower_score_check = board_clone.m[row + row_conv_1][
+                                        column + column_conv_1]
+                                    if current_tower_score_check == -self.player * (
+                                            h - score_incomplet) and tower_score == -self.player * score_incomplet:
+                                        score_tot += -self.player * WEIGHT_1
+                                        break
+                                    elif current_tower_score_check == -self.player * (
+                                            h - score_incomplet) and tower_score == self.player * score_incomplet:
+                                        score_tot += -self.player * WEIGHT_2
+                                        break
+        return score_tot
+
     def timed_exec(self, fn, *args, agent=None):
         """Execute self.agents[agent].fn(*args, time_left) with the
         time limit for the current player.
@@ -313,19 +349,19 @@ class Game:
         logging.info("Step %d: received result %s in %fs",
                      self.step, result, t)
 
-        game_log_time_J1 = "game_log_time_J1.csv"
-        game_log_time_J2 = "game_log_time_J2.csv"
+        game_log_time_J1 = "log_score_J1.csv"
+        game_log_time_J2 = "log_score_J2.csv"
         if self.step == 1:
             with open(game_log_time_J1, 'a') as file:
                 file.write('\n')
             with open(game_log_time_J2, 'a') as file:
                 file.write('\n')
         with open(game_log_time_J1, 'a') as file:
-            if self.step % 2 == 0 and self.step > 20:
-                file.write(str(t) + ',')
+            if self.step % 2 == 0 and self.step > 10:
+                file.write(str(self.utility(self.board)) + ',')
         with open(game_log_time_J2, 'a') as file:
-            if self.step % 2 == 1 and self.step > 20:
-                file.write(str(t) + ',')
+            if self.step % 2 == 1 and self.step > 10:
+                file.write(str(self.utility(self.board)) + ',')
 
         if self.credits[agent] is not None:
             self.credits[agent] -= t

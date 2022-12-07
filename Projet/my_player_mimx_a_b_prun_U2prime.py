@@ -37,16 +37,10 @@ class MyAgent(Agent):
         board = dict_to_board(percepts)
 
         def time_limit(step_arg):
-            if step_arg <= 18:
-                return CONST_MULT * (1 / (np.sqrt(2 * np.pi))) * (
-                    np.exp((-1 / 2) * (16.6 + (step_arg - 6) * CONST_STEP_1 - 18) * (
-                                16.6 + (step_arg - 6) * CONST_STEP_1 - 18)))
-            elif step_arg <= 27:
-                return CONST_MULT * (1 / (np.sqrt(2 * np.pi))) * (
-                    np.exp((-1 / 2) * (18 + (step_arg - 18) * CONST_STEP_2 - 18) * (
-                                18 + (step_arg - 18) * CONST_STEP_2 - 18)))
-            elif step_arg <= 40:
-                return 45
+            if step_arg <= 26:
+                return 1.45*(20 + 170*(1 / (2*(np.sqrt(15 * np.pi)))) * (np.exp((-1 / 2) * (step_arg-20) * (step_arg-20)/(15*15))))
+            else:
+                return 1.45*31
 
         def utility_2(board_arg):
             board_clone = board_arg.clone()
@@ -70,7 +64,8 @@ class MyAgent(Agent):
                             for row_conv_1 in range(-1, 2, 1):
                                 for column_conv_1 in range(-1, 2, 1):
                                     if row + row_conv_1 < 8 and row + row_conv_1 > 0 and column + column_conv_1 < 8 and column + column_conv_1 > 0:
-                                        current_tower_score_check = board_clone.m[row + row_conv_1][column + column_conv_1]
+                                        current_tower_score_check = board_clone.m[row + row_conv_1][
+                                            column + column_conv_1]
                                         if (current_tower_score_check == 5 - score_incomplet):
                                             positives_tower_score += 10
                                             negatives_tower_score += 10
@@ -108,7 +103,8 @@ class MyAgent(Agent):
                 for action in actions:
                     board_arg_clone = board_arg.clone()
                     board_arg_clone.play_action(action)
-                    score_intermediaire1, an_action = min_val(board_arg_clone, time_lim, alpha, beta, start_t, profondeur + 1)
+                    score_intermediaire1, an_action = min_val(board_arg_clone, time_lim, alpha, beta, start_t,
+                                                              profondeur + 1)
                     if score_intermediaire1 > score_best_action:
                         score_best_action = score_intermediaire1
                         best_action = action
@@ -130,7 +126,8 @@ class MyAgent(Agent):
                 for action in actions:
                     board_arg_clone = board_arg.clone()
                     board_arg_clone.play_action(action)
-                    score_intermediaire1, an_action = max_val(board_arg_clone, time_lim, alpha, beta, start_t, profondeur + 1)
+                    score_intermediaire1, an_action = max_val(board_arg_clone, time_lim, alpha, beta, start_t,
+                                                              profondeur + 1)
                     if score_intermediaire1 < score_best_action:
                         score_best_action = score_intermediaire1
                         best_action = action
@@ -139,11 +136,22 @@ class MyAgent(Agent):
                         return score_best_action, best_action
                 return score_best_action, best_action
 
+        def predict_score(board_arg, action):
+            board_clone = board_arg.clone()
+            board_clone.play_action(action)
+            return board_clone.m[action[2]][action[3]]
+
+        if step == 1:
+            print("Played_(1,1,1,2)")
+            return 1, 1, 1, 2
         score_best_action, best_action = minimax_search(board)
         if best_action is None:
             actions = list(board.get_actions())
-            print("Played_Random")
-            return random.choice(actions)
+            order = [player * 5, player * 4, player * 3, player * 2, -player * 2, -player * 3, -player * 4, -player * 5]
+            srt = {b: i for i, b in enumerate(order)}
+            sorted_actions = sorted(actions, key=lambda a: srt[predict_score(board, a)])
+            print("Played_Greedy")
+            return sorted_actions[0]
         print("Played_Minimax")
         return best_action
 

@@ -33,7 +33,10 @@ class MyAgent(Agent):
 
     def play(self, percepts, player, step, time_left):
 
-        print("player:", player, "step:", step, "time left:", time_left if time_left else '+inf')
+        print("percept:", np.array(percepts))
+        print("player:", player)
+        print("step:", step)
+        print("time left:", time_left if time_left else '+inf')
         board = dict_to_board(percepts)
 
         def time_limit(step_arg):
@@ -48,12 +51,14 @@ class MyAgent(Agent):
             elif step_arg <= 40:
                 return 45
 
-        def utility_2(board_arg):
+        def utility_4(board_arg):
             board_clone = board_arg.clone()
             rows = board_clone.rows
             columns = board_clone.columns
             positives_tower_score = 0
             negatives_tower_score = 0
+            nb_tower_Jn_visible = 0
+            nb_tower_Jp_visible = 0
             for row in range(0, rows, 1):
                 for column in range(0, columns, 1):
                     # Partie d'Heuristique qui permet de compter le score actuel par tour
@@ -61,8 +66,10 @@ class MyAgent(Agent):
                     if tower_score != 0:
                         if tower_score > 0:
                             positives_tower_score += tower_score
+                            nb_tower_Jp_visible += 1
                         elif tower_score < 0:
                             negatives_tower_score += tower_score
+                            nb_tower_Jn_visible += 1
                     # Partie d'Heuristique qui permet de ne pas laisser une tour completable ( de 2, 3 et 4 vers 5 ) par l'adversaire
                     # au prochain tour, et qui minimise le score si c'est le cas. Attention minimisation des 10, à modifier eventuellement !
                     for score_incomplet in range(2, 4, 1):
@@ -72,15 +79,15 @@ class MyAgent(Agent):
                                     if row + row_conv_1 < 8 and row + row_conv_1 > 0 and column + column_conv_1 < 8 and column + column_conv_1 > 0:
                                         current_tower_score_check = board_clone.m[row + row_conv_1][column + column_conv_1]
                                         if (current_tower_score_check == 5 - score_incomplet):
-                                            positives_tower_score += 10
-                                            negatives_tower_score += 10
+                                            positives_tower_score += 5
+                                            negatives_tower_score += 5
                                         elif (current_tower_score_check == -5 + score_incomplet):
-                                            negatives_tower_score -= 10
-                                            positives_tower_score -= 10
+                                            negatives_tower_score -= 5
+                                            positives_tower_score -= 5
             if player > 0:
-                return positives_tower_score
+                return positives_tower_score + nb_tower_Jp_visible
             elif player < 0:
-                return negatives_tower_score
+                return negatives_tower_score + nb_tower_Jn_visible
 
         def minimax_search(board_arg):
             alpha = -100000
@@ -101,7 +108,7 @@ class MyAgent(Agent):
             if player > 0:
                 actions.reverse()
             if time.time() - start_t >= time_left_to_play and profondeur != 0:
-                return utility_2(board_arg), None
+                return utility_4(board_arg), None
             else:
                 score_best_action = -10000
                 best_action = None
@@ -123,7 +130,7 @@ class MyAgent(Agent):
             if player < 0:
                 actions.reverse()
             if time.time() - start_t >= time_left_to_play and profondeur != 0:
-                return utility_2(board_arg), None
+                return utility_4(board_arg), None
             else:
                 score_best_action = 100000
                 best_action = None
@@ -142,9 +149,7 @@ class MyAgent(Agent):
         score_best_action, best_action = minimax_search(board)
         if best_action is None:
             actions = list(board.get_actions())
-            print("Played_Random")
             return random.choice(actions)
-        print("Played_Minimax")
         return best_action
 
 

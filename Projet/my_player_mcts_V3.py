@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 Avalam agent.
-Copyright (C) 2022, <<<<<<<<<<< YOUR NAMES HERE >>>>>>>>>>>
-Polytechnique Montréal
+Copyright (C) 2022, Maxime LE DOEUFF 2234867, Ahmed DHAHIR - 2239705Polytechnique Montréal
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,15 +24,9 @@ from math import sqrt, log, exp
 from decimal import Decimal
 import time
 
-CONSTANTE_C = 10.7
-
-# pour le joueur qui commence au tour 5
-# 12.7*(sqrt(35)+sqrt(33)+sqrt(31)+sqrt(29)+sqrt(27)+sqrt(25)+sqrt(23)+sqrt(21)+sqrt(19)+sqrt(17)+sqrt(15)
-# +sqrt(13)+sqrt(11)+sqrt(9)+sqrt(7)+sqrt(5)) < 900
-
-# pour le joueur qui commence au tour 6
-# 12.7*(sqrt(36)+sqrt(34)+sqrt(32)+sqrt(30)+sqrt(28)+sqrt(26)+sqrt(24)+sqrt(22)+sqrt(20)+sqrt(18)+sqrt(16)+sqrt(14)
-# +sqrt(12)+sqrt(10)+sqrt(8)+sqrt(6)) < 900
+CONST_MULT = 165
+CONST_STEP_1 = 1.4/12
+CONST_STEP_2 = 1/12
 
 class MyAgent(Agent):
     """My Avalam agent."""
@@ -48,7 +41,15 @@ class MyAgent(Agent):
         board = dict_to_board(percepts)
 
         def time_limit(x):
-            return CONSTANTE_C * sqrt(x)
+            if step <= 18:
+                return CONST_MULT * (1 / (np.sqrt(2 * np.pi))) * (
+                    np.exp((-1 / 2) * (16.6 + (step - 6) * CONST_STEP_1 - 18) * (16.6 + (step - 6) * CONST_STEP_1 - 18)))
+            elif step <= 27:
+                return CONST_MULT * (1 / (np.sqrt(2 * np.pi))) * (
+                    np.exp((-1 / 2) * ((step - 18) * CONST_STEP_2) * ((step - 18) * CONST_STEP_2)))
+            elif step <= 38:
+                return 45
+
 
         def get_score(board_game):
             board_clone = board_game.clone()
@@ -67,8 +68,9 @@ class MyAgent(Agent):
 
         def select(root_node, start_time, step_arg):
             current_node = root_node
+            #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
             time_left_to_play = min(time_limit(step_arg), time_left)
-            # time_lim(step) est toujours < timeleft sauf peut etre pour le dernier coup si jamais erreur dans
+            # sqrt(step) * cst_c est toujours < timeleft sauf peut etre pour le dernier coup si jamais erreur dans
             # les calculs et en fait on a pris plus de temps que prévus ...
             while not current_node.get_is_leaf():
                 if time.time() - start_time >= time_left_to_play:
@@ -102,6 +104,7 @@ class MyAgent(Agent):
 
         def expend(n, start_time, step_arg):
             board_clone = n.get_board()
+            #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
             time_left_to_play = min(time_limit(step_arg), time_left)
             if n.get_n() > 0 or n.get_is_root():
                 if list(board_clone.get_actions()):
@@ -121,6 +124,7 @@ class MyAgent(Agent):
         def simulate(n, start_time, step_arg):
             clone_board = n.get_board()
             step_player = n.get_step_player()
+            #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
             time_left_to_play = min(time_limit(step_arg), time_left)
             while not clone_board.is_finished():
                 if time.time() - start_time >= time_left_to_play:
@@ -139,6 +143,7 @@ class MyAgent(Agent):
 
         def backpropagation(v, n, start_time, step_arg):
             current_node = n
+           #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
             time_left_to_play = min(time_limit(step_arg), time_left)
             while not (current_node.get_is_root()):
                 if time.time() - start_time >= time_left_to_play:
@@ -167,6 +172,7 @@ class MyAgent(Agent):
             root_node.set_step_player(player)
             emergence_root_node = root_node
             start_time = time.time()
+            #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
             time_left_to_play = min(time_limit(step_arg), time_left)
             print("time_left_to_play : ", time_left_to_play)
             while time.time() - start_time <= time_left_to_play:
@@ -192,6 +198,7 @@ class MyAgent(Agent):
             root_node.set_step_player(player)
             #emergence_root_node = root_node
             start_time = time.time()
+            #time_left_to_play = min(sqrt(step_arg) * CONSTANTE_C, time_left)
             time_left_to_play = min(time_limit(step_arg), time_left)
             while time.time() - start_time <= time_left_to_play:
                 boolean, node_leaf = select(root_node, start_time, step_arg)
